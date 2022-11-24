@@ -10,12 +10,41 @@ app.use(cors());
 app.use(express.json());
 
 const uri = process.env.DB_URI;
-console.log(uri);
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+const run = async () => {
+  try {
+    const usersCollection = client.db("laptopZone").collection("users");
+
+    // create user to the database
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // check admin
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" });
+    });
+    // check seller
+    app.get("/users/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isSeller: user?.role === "seller" });
+    });
+  } finally {
+  }
+};
+run().catch((err) => console.log(err));
 
 app.get("/", (req, res) => {
   res.send("Server is running");
