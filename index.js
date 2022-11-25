@@ -20,10 +20,28 @@ const run = async () => {
   try {
     const usersCollection = client.db("laptopZone").collection("users");
     const blogsCollection = client.db("laptopZone").collection("blogs");
+    const categoryCollection = client.db("laptopZone").collection("category");
+    const productsCollection = client.db("laptopZone").collection("products");
 
+    // add/post a product
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // get all blogs
     app.get("/blogs", async (req, res) => {
       const query = {};
       const result = await blogsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get all category
+    app.get("/category", async (req, res) => {
+      const query = {};
+      const result = await categoryCollection.find(query).toArray();
       res.send(result);
     });
 
