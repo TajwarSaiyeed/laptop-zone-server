@@ -20,6 +20,24 @@ const run = async () => {
   try {
     const usersCollection = client.db("laptopZone").collection("users");
 
+    // verify user
+    app.put("/users", async (req, res) => {
+      const email = req.query.email;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          verified: true,
+        },
+      };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
     // create user to the database
     app.post("/users", async (req, res) => {
       const user = req.body;
