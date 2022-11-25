@@ -27,9 +27,25 @@ const run = async () => {
       res.send(result);
     });
 
+    // get all sellers for admin
+    app.get("/users", async (req, res) => {
+      const query = {};
+      const users = await usersCollection.find(query).toArray();
+      res.send(users);
+    });
+
+    // delete a user by admin
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // check admin
     app.get("/users/admin/:email", async (req, res) => {
       const email = req.params.email;
+      console.log(email);
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       res.send({ isAdmin: user?.role === "admin" });
