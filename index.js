@@ -19,6 +19,13 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     const usersCollection = client.db("laptopZone").collection("users");
+    const blogsCollection = client.db("laptopZone").collection("blogs");
+
+    app.get("/blogs", async (req, res) => {
+      const query = {};
+      const result = await blogsCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // verify user
     app.put("/users", async (req, res) => {
