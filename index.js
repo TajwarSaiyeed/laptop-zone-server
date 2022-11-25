@@ -33,7 +33,6 @@ const run = async () => {
     // get product by email for specific seller
     app.get("/products", async (req, res) => {
       const email = req.query.email;
-      console.log(email);
       const query = { sellerEmail: email };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
