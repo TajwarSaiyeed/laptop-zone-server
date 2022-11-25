@@ -26,8 +26,16 @@ const run = async () => {
     // add/post a product
     app.post("/products", async (req, res) => {
       const product = req.body;
-      console.log(product);
       const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // get product by email for specific seller
+    app.get("/products", async (req, res) => {
+      const email = req.query.email;
+      console.log(email);
+      const query = { sellerEmail: email };
+      const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
 
