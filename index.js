@@ -22,6 +22,32 @@ const run = async () => {
     const blogsCollection = client.db("laptopZone").collection("blogs");
     const categoryCollection = client.db("laptopZone").collection("category");
     const productsCollection = client.db("laptopZone").collection("products");
+    const ordersCollection = client.db("laptopZone").collection("orders");
+
+    // put a order
+    app.put("/orders", async (req, res) => {
+      const id = req.query.id;
+      const order = req.body;
+      const filter = { bookId: id };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: order,
+      };
+      const result = await ordersCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // get all order for specific email
+    app.get("/orders", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await ordersCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // add/post a product
     app.post("/products", async (req, res) => {
@@ -146,6 +172,13 @@ const run = async () => {
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       res.send({ isSeller: user?.role === "seller" });
+    });
+    // check buyer
+    app.get("/users/buyer/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isBuyer: user?.role === "buyer" });
     });
   } finally {
   }
