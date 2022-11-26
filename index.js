@@ -30,6 +30,47 @@ const run = async () => {
       res.send(result);
     });
 
+    // report product
+    app.put("/products", async (req, res) => {
+      const id = req.query.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          reported: true,
+        },
+      };
+      const result = await productsCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // get reported items
+    app.get("/reportedProducts", async (req, res) => {
+      const query = { reported: true };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // reported item delete
+    app.delete("/reportedProducts", async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // get all product by categroy
+    app.get("/category/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { categoryId: id };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // get product by email for specific seller
     app.get("/products", async (req, res) => {
       const email = req.query.email;
