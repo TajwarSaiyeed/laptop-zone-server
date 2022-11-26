@@ -16,6 +16,21 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ error: 401, message: "Unauthorized Access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ error: 403, message: "Forbidded Access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 const run = async () => {
   try {
     const usersCollection = client.db("laptopZone").collection("users");
@@ -42,8 +57,14 @@ const run = async () => {
     });
 
     // get all order for specific email
-    app.get("/orders", async (req, res) => {
+    app.get("/orders", verifyJWT, async (req, res) => {
       const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if (decodedEmail !== email) {
+        return res
+          .status(403)
+          .send({ error: 403, message: "Forbidden Access" });
+      }
       const query = { email: email };
       const result = await ordersCollection.find(query).toArray();
       res.send(result);
@@ -135,6 +156,20 @@ const run = async () => {
         options
       );
       res.send(result);
+    });
+
+    // jwt
+    app.get("/jwt", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user) {
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
+          expiresIn: "1d",
+        });
+        return res.send({ accessToken: token });
+      }
+      res.status(403).send({ accessToken: "" });
     });
 
     // create user to the database
