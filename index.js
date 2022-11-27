@@ -72,7 +72,6 @@ const run = async () => {
     // update booking information
     app.put("/revokeOrder", verifyJWT, async (req, res) => {
       const id = req.query.id;
-      console.log(id);
       const query = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updateProductsDoc = {
