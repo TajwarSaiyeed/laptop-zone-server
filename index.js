@@ -153,6 +153,13 @@ const run = async () => {
       res.send(result);
     });
 
+    // get all advertise product
+    app.get("/advertiseProduct", async (req, res) => {
+      const query = { advertise: true };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // reported item delete
     app.delete("/reportedProducts", verifyJWT, async (req, res) => {
       const id = req.query.id;
@@ -237,7 +244,7 @@ const run = async () => {
       const user = await usersCollection.findOne(query);
       if (user) {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
-          expiresIn: "1d",
+          expiresIn: "5d",
         });
         return res.send({ accessToken: token });
       }
