@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { query } = require("express");
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -68,6 +69,25 @@ const run = async () => {
       );
       res.send(result);
     });
+    // update booking information
+    app.put("/revokeOrder", verifyJWT, async (req, res) => {
+      const id = req.query.id;
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateProductsDoc = {
+        $set: {
+          isBooked: false,
+        },
+      };
+
+      const result = await productsCollection.updateOne(
+        query,
+        updateProductsDoc,
+        options
+      );
+      res.send(result);
+    });
 
     // check the product id with bookid in ordesCollection
     app.get("/checkOrders", verifyJWT, async (req, res) => {
@@ -91,6 +111,14 @@ const run = async () => {
       }
       const query = { email: email };
       const result = await ordersCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete orders
+    app.delete("/orders", verifyJWT, async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
       res.send(result);
     });
 
