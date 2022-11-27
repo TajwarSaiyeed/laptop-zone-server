@@ -179,6 +179,19 @@ const run = async () => {
         updateDoc,
         options
       );
+      const filterSeller = { sellerEmail: email };
+
+      const updateVerifyDoc = {
+        $set: {
+          isVerified: true,
+        },
+      };
+
+      const isverified = await productsCollection.updateOne(
+        filterSeller,
+        updateVerifyDoc,
+        options
+      );
       res.send(result);
     });
 
@@ -197,7 +210,7 @@ const run = async () => {
     });
 
     // create user to the database
-    app.post("/users", verifyJWT, async (req, res) => {
+    app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
       res.send(result);
@@ -231,6 +244,13 @@ const run = async () => {
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       res.send({ isSeller: user?.role === "seller" });
+    });
+    // check seller
+    app.get("/sellerVerify/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isVerified: user?.verified === true });
     });
     // check buyer
     app.get("/users/buyer/:email", verifyJWT, async (req, res) => {
