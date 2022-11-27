@@ -129,7 +129,7 @@ const run = async () => {
     });
 
     // report product
-    app.put("/products", async (req, res) => {
+    app.put("/products", verifyJWT, async (req, res) => {
       const id = req.query.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
@@ -153,7 +153,7 @@ const run = async () => {
       res.send(result);
     });
 
-    app.put("/advertiseProduct", async (req, res) => {
+    app.put("/advertiseProduct", verifyJWT, async (req, res) => {
       const id = req.query.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
