@@ -40,6 +40,19 @@ const run = async () => {
     const productsCollection = client.db("laptopZone").collection("products");
     const ordersCollection = client.db("laptopZone").collection("orders");
 
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const query = { email: decodedEmail };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "admin") {
+        return res
+          .status(403)
+          .send({ error: 401, message: "forbidden access" });
+      }
+      next();
+    };
+
     // put a order
     app.put("/orders", verifyJWT, async (req, res) => {
       const id = req.query.id;
@@ -224,7 +237,7 @@ const run = async () => {
     });
 
     // verify user
-    app.put("/users", verifyJWT, async (req, res) => {
+    app.put("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const email = req.query.email;
       const filter = { email: email };
       const options = { upsert: true };
@@ -276,14 +289,14 @@ const run = async () => {
     });
 
     // get all sellers for admin
-    app.get("/users", verifyJWT, async (req, res) => {
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const query = {};
       const users = await usersCollection.find(query).toArray();
       res.send(users);
     });
 
     // delete a user by admin
-    app.delete("/users/:id", verifyJWT, async (req, res) => {
+    app.delete("/users/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
@@ -304,7 +317,7 @@ const run = async () => {
       const user = await usersCollection.findOne(query);
       res.send({ isSeller: user?.role === "seller" });
     });
-    // check seller
+    // verify seller
     app.get("/sellerVerify/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
