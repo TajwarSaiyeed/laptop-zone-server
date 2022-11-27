@@ -187,7 +187,7 @@ const run = async () => {
         },
       };
 
-      const isverified = await productsCollection.updateOne(
+      const isverified = await productsCollection.updateMany(
         filterSeller,
         updateVerifyDoc,
         options
