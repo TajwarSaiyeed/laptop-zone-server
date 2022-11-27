@@ -150,6 +150,14 @@ const run = async () => {
       res.send(result);
     });
 
+    // delete product
+    app.delete("/products", verifyJWT, async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // get all blogs
     app.get("/blogs", async (req, res) => {
       const query = {};
