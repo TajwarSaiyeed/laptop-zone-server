@@ -146,16 +146,33 @@ const run = async () => {
       res.send(result);
     });
 
-    // get reported items
-    app.get("/reportedProducts", verifyJWT, async (req, res) => {
-      const query = { reported: true };
+    // get all advertise product
+    app.get("/advertiseProduct", async (req, res) => {
+      const query = { advertise: true };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
 
-    // get all advertise product
-    app.get("/advertiseProduct", async (req, res) => {
-      const query = { advertise: true };
+    app.put("/advertiseProduct", async (req, res) => {
+      const id = req.query.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          advertise: true,
+        },
+      };
+      const result = await productsCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // get reported items
+    app.get("/reportedProducts", verifyJWT, async (req, res) => {
+      const query = { reported: true };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
