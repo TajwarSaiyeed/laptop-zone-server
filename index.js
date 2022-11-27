@@ -53,6 +53,19 @@ const run = async () => {
         updatedDoc,
         options
       );
+
+      const query = { _id: ObjectId(id) };
+      const updateProductsDoc = {
+        $set: {
+          isBooked: true,
+        },
+      };
+
+      const updateProducts = await productsCollection.updateOne(
+        query,
+        updateProductsDoc,
+        options
+      );
       res.send(result);
     });
 
