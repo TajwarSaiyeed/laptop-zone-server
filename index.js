@@ -42,6 +42,7 @@ const run = async () => {
     const productsCollection = client.db("laptopZone").collection("products");
     const ordersCollection = client.db("laptopZone").collection("orders");
     const paymentsCollection = client.db("laptopZone").collection("payments");
+    const messagesCollection = client.db("laptopZone").collection("messages");
 
     // verify admin
     const verifyAdmin = async (req, res, next) => {
@@ -68,6 +69,19 @@ const run = async () => {
       }
       next();
     };
+
+    // get all messages
+    app.get("/messages", verifyJWT, verifyAdmin, async (req, res) => {
+      const query = {};
+      const result = await messagesCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/messages", verifyJWT, async (req, res) => {
+      const messages = req.body;
+      const result = await messagesCollection.insertOne(messages);
+      res.send(result);
+    });
 
     // create payment intent
     app.post("/create-payment-intent", async (req, res) => {
