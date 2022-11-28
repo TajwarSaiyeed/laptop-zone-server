@@ -19,6 +19,7 @@ const client = new MongoClient(uri, {
 
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
+  // console.log(authHeader);
   if (!authHeader) {
     return res.status(401).send({ error: 401, message: "Unauthorized Access" });
   }
@@ -48,7 +49,19 @@ const run = async () => {
       if (user?.role !== "admin") {
         return res
           .status(403)
-          .send({ error: 401, message: "forbidden access" });
+          .send({ error: 403, message: "forbidden access" });
+      }
+      next();
+    };
+
+    const verifySeller = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const query = { email: decodedEmail };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "seller") {
+        return res
+          .status(403)
+          .send({ error: 403, message: "forbidden access" });
       }
       next();
     };
@@ -135,7 +148,7 @@ const run = async () => {
     });
 
     // add/post a product
-    app.post("/products", verifyJWT, async (req, res) => {
+    app.post("/products", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
       res.send(result);
@@ -166,7 +179,7 @@ const run = async () => {
       res.send(result);
     });
 
-    app.put("/advertiseProduct", verifyJWT, async (req, res) => {
+    app.put("/advertiseProduct", verifyJWT, verifySeller, async (req, res) => {
       const id = req.query.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
@@ -184,19 +197,24 @@ const run = async () => {
     });
 
     // get reported items
-    app.get("/reportedProducts", verifyJWT, async (req, res) => {
+    app.get("/reportedProducts", verifyJWT, verifyAdmin, async (req, res) => {
       const query = { reported: true };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
 
     // reported item delete
-    app.delete("/reportedProducts", verifyJWT, async (req, res) => {
-      const id = req.query.id;
-      const query = { _id: ObjectId(id) };
-      const result = await productsCollection.deleteOne(query);
-      res.send(result);
-    });
+    app.delete(
+      "/reportedProducts",
+      verifyJWT,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.query.id;
+        const query = { _id: ObjectId(id) };
+        const result = await productsCollection.deleteOne(query);
+        res.send(result);
+      }
+    );
 
     // get all product by categroy
     app.get("/category/:id", verifyJWT, async (req, res) => {
@@ -207,7 +225,7 @@ const run = async () => {
     });
 
     // get product by email for specific seller
-    app.get("/products", verifyJWT, async (req, res) => {
+    app.get("/products", verifyJWT, verifySeller, async (req, res) => {
       const email = req.query.email;
       const query = { sellerEmail: email };
       const result = await productsCollection.find(query).toArray();
@@ -215,7 +233,7 @@ const run = async () => {
     });
 
     // delete product
-    app.delete("/products", verifyJWT, async (req, res) => {
+    app.delete("/products", verifyJWT, verifySeller, async (req, res) => {
       const id = req.query.id;
       const query = { _id: ObjectId(id) };
       const result = await productsCollection.deleteOne(query);
