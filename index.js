@@ -145,7 +145,7 @@ const run = async () => {
       );
       res.send(result);
     });
-    // update booking information
+    // update booking information and revoke order
     app.put("/revokeOrder", verifyJWT, async (req, res) => {
       const id = req.query.id;
       const query = { _id: ObjectId(id) };
